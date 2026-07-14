@@ -1,0 +1,96 @@
+const pantry = [{
+        sku: "A10",
+        name: "Tomatoes",
+        qty: 4,
+        expires: "2027-01-01",
+        zone: "fridge"
+    },
+    {
+        sku: "D43",
+        name: "Pineapples",
+        qty: 2,
+        expires: "2020-01-01",
+        zone: "general"
+    }
+];
+
+const rawData = [
+    "A10|Tomatoes|5|2027-01-01",
+    "B21|Bananas|10|2027-01-01",
+    "C32|Eggs|3|2027-01-01|fridge",
+    "C32|Eggs|3|2027-01-01",
+    "D43|Pineapples|0|2027-01-01",
+    "E54|Peppers|-1|2027-01-01|fridge"
+];
+
+
+function parseShipment(rawData) {
+    const inventory = [];
+    const uniqueSkus = [];
+    rawData = rawData.map(e => e.split('|'))
+    for (let i = 0; i < rawData.length; i++) {
+        if (!uniqueSkus.includes(rawData[i][0])) {
+            uniqueSkus.push(rawData[i][0]);
+            inventory.push({
+                sku: rawData[i][0],
+                name: rawData[i][1],
+                qty: Number(rawData[i][2]),
+                expires: rawData[i][3],
+                zone: rawData[i][4] || 'general',
+            }, );
+        }
+    };
+    // console.log(uniqueSkus)
+    return inventory;
+}
+
+function planRestock(pantry, shipment) {
+    const actions = [];
+    const shipmentSkus = shipment.map(e => e.sku);
+    const pantrySkus = pantry.map(e => e.sku);
+    const foundInPantry = shipmentSkus.filter(e => pantrySkus.includes(e));
+
+    for (let i = 0; i < shipment.length; i++) {
+
+        if (Number.isNaN(shipment[i].qty) || shipment[i].qty < 1) {
+            actions.push({
+                type: 'discard',
+                item: shipment[i]
+            });
+            continue;
+        };
+        if (foundInPantry.includes(shipment[i].sku)) {
+            actions.push({
+                type: 'restock',
+                item: shipment[i]
+            });
+        } else {
+            actions.push({
+                type: 'donate',
+                item: shipment[i]
+            });
+        };
+    }
+    return actions
+}
+
+
+function groupByZone(actions) {
+    const zones = {};
+
+    for (let i = 0; i < actions.length; i++) {
+        let zone = actions[i].item.zone;
+
+        if (!zones[zone]) {
+            zones[zone] = [];
+        }
+        zones[zone].push(actions[i])
+    }
+    return zones;
+};
+
+function clonePantry(pantry) {
+    return structuredClone(pantry)
+}
+
+console.log(groupByZone(planRestock(pantry, parseShipment(rawData))))
