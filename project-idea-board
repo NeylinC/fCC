@@ -1,0 +1,59 @@
+const projectStatus = {
+    'PENDING': {
+        'description': 'Pending Execution'
+    },
+    'SUCCESS': {
+        'description': 'Executed Successfully'
+    },
+    'FAILURE': {
+        'description': 'Execution Failed'
+    }
+};
+
+class ProjectIdea {
+    constructor(title, description) {
+        this.title = title;
+        this.description = description;
+        this.status = projectStatus.PENDING
+    };
+
+    updateProjectStatus(newStatus) {
+        this.status = newStatus;
+    };
+};
+
+class ProjectIdeaBoard {
+    constructor(title) {
+        this.title = title;
+        this.ideas = [];
+    };
+
+    pin(ProjectIdea) {
+        this.ideas.push(ProjectIdea)
+    };
+
+    unpin(ProjectIdea) {
+        this.ideas.pop(ProjectIdea);
+    };
+
+    count() {
+        return this.ideas.length;
+    };
+
+    formatToString() {
+        return `${this.title} has ${this.ideas.length} idea(s)\n` +
+            `${this.ideas.map(el => 
+    `${el.title} (${el.status.description}) - ${el.description}\n`)}`
+    }
+};
+
+const ideaTest = new ProjectIdea("Smart Home System", "An integrated system to control lighting, temperature, and security devices remotely.");
+
+const ideaTest2 = new ProjectIdea("Cool Tech", "This is a cool tech description.");
+
+const test = new ProjectIdeaBoard("Tech Projects Board");
+
+test.pin(ideaTest)
+test.pin(ideaTest2)
+
+console.log(test.formatToString())
